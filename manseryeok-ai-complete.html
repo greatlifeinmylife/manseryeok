@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>만세력 - AI 사주 분석</title>
+    
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
+     crossorigin="anonymous"></script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Noto+Serif+KR:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.6.12/lunar.min.js"></script>
+    
+    <style>
+        * { font-family: 'Noto Sans KR', sans-serif; }
+        .serif { font-family: 'Noto Serif KR', serif; }
+        
+        .header-bar {
+            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+            color: white;
+        }
+        
+        .saju-table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        
+        .saju-table td, .saju-table th {
+            border: 1px solid #d1d5db;
+            padding: 10px;
+            text-align: center;
+        }
+        
+        .pillar-header {
+            background: #f3f4f6;
+            font-weight: bold;
+            font-size: 13px;
+        }
+        
+        .hanja-xlarge {
+            font-size: 3.5rem;
+            font-weight: 900;
+            font-family: 'Noto Serif KR', serif;
+            line-height: 1;
+        }
+        
+        .hanja-large {
+            font-size: 2rem;
+            font-weight: 900;
+            font-family: 'Noto Serif KR', serif;
+            line-height: 1;
+        }
+        
+        .hanja-medium {
+            font-size: 1.5rem;
+            font-weight: 900;
+            font-family: 'Noto Serif KR', serif;
+            line-height: 1;
+        }
+        
+        .hanja-small {
+            font-size: 1.1rem;
+            font-weight: 900;
+            font-family: 'Noto Serif KR', serif;
+            line-height: 1;
+        }
+        
+        /* 오행 색상 - 천간 */
+        .gan-wood { background: #dcfce7; color: #166534; }
+        .gan-fire { background: #fecaca; color: #991b1b; }
+        .gan-earth { background: #fef3c7; color: #92400e; }
+        .gan-metal { background: #e5e7eb; color: #374151; }
+        .gan-water { background: #dbeafe; color: #1e40af; }
+        
+        /* 오행 색상 - 지지 */
+        .zhi-wood { background: #dcfce7; color: #166534; }
+        .zhi-fire { background: #fecaca; color: #991b1b; }
+        .zhi-earth { background: #fef3c7; color: #92400e; }
+        .zhi-metal { background: #e5e7eb; color: #374151; }
+        .zhi-water { background: #dbeafe; color: #1e40af; }
+        
+        .selected-daeun {
+            background: #fb923c !important;
+            color: white !important;
+            border: 2px solid #ea580c !important;
+        }
+        
+        .selected-nyeonun {
+            background: #3b82f6 !important;
+            color: white !important;
+            border: 2px solid #2563eb !important;
+        }
+        
+        .selected-wolun {
+            background: #10b981 !important;
+            color: white !important;
+            border: 2px solid #059669 !important;
+        }
+        
+        .clickable {
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        
+        .clickable:hover {
+            opacity: 0.8;
+            transform: scale(1.05);
+        }
+        
+        .blue-text { color: #3b82f6; font-weight: 600; }
+        
+        .un-cell { 
+            padding: 4px 2px; 
+            font-size: 11px; 
+        }
+        
+        .ai-analysis {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-left: 4px solid #3b82f6;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+        
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 광고 스타일 */
+        .ad-container {
+            background: #f9fafb;
+            border: 1px dashed #d1d5db;
+            min-height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <!-- Header -->
+    <div class="header-bar py-4 px-6 flex items-center justify-between">
+        <button class="text-xl">← 이전</button>
+        <h1 class="text-2xl font-bold">AI 만세력</h1>
+        <div class="flex gap-3">
+            <span>홈</span>
+            <span>🏠</span>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="max-w-4xl mx-auto bg-white pb-20">
+        
+        <!-- 입력 폼 -->
+        <div class="p-6 bg-white border-b-4 border-gray-300">
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-semibold mb-2">성별</label>
+                    <select id="gender" class="w-full px-3 py-2 border-2 border-gray-300 rounded">
+                        <option value="male">남자</option>
+                        <option value="female">여자</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-2">달력</label>
+                    <select id="calType" class="w-full px-3 py-2 border-2 border-gray-300 rounded">
+                        <option value="solar">양력</option>
+                        <option value="lunar">음력</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-semibold mb-2">년</label>
+                    <input type="number" id="year" value="1974" class="w-full px-3 py-2 border-2 border-gray-300 rounded">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-2">월</label>
+                    <input type="number" id="month" value="9" class="w-full px-3 py-2 border-2 border-gray-300 rounded">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-2">일</label>
+                    <input type="number" id="day" value="13" class="w-full px-3 py-2 border-2 border-gray-300 rounded">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-semibold mb-2">시</label>
+                    <input type="number" id="hour" value="12" class="w-full px-3 py-2 border-2 border-gray-300 rounded">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-2">분</label>
+                    <input type="number" id="minute" value="0" class="w-full px-3 py-2 border-2 border-gray-300 rounded">
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <button onclick="calculate()" class="flex-1 bg-orange-500 text-white py-3 rounded-lg font-bold">
+                    명조보기
+                </button>
+                <button onclick="analyzeWithAI()" class="flex-1 bg-blue-500 text-white py-3 rounded-lg font-bold">
+                    🤖 AI 분석
+                </button>
+            </div>
+        </div>
+
+        <!-- 광고 1 (상단) -->
+        <div class="ad-container">
+            <!-- Google AdSense 광고 -->
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+                 data-ad-slot="1234567890"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+            <script>
+                 (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+        </div>
+
+        <!-- 결과 -->
+        <div id="results" class="hidden">
+            
+            <!-- 타이틀 -->
+            <div class="bg-gray-100 py-4 text-center">
+                <h2 id="title" class="text-2xl font-bold">SCM(53세)</h2>
+            </div>
+
+            <!-- 날짜 정보 -->
+            <div class="bg-white p-4 border-b">
+                <div class="grid grid-cols-4 gap-2 text-xs">
+                    <div>
+                        <div class="mb-1">(양)<span id="solarInfo">1974년 09월 13일</span></div>
+                        <div class="mb-1">(음)<span id="lunarInfo">1974년 07월 27일</span></div>
+                        <div class="mb-1">(正)<span id="jungInfo">1974년 09월 13일</span></div>
+                        <div class="blue-text" id="jeolipInfo">백로1974년 09월 08일</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-gray-600" id="siName">午時</div>
+                        <div class="blue-text text-2xl font-bold" id="timeDisplay">12:00</div>
+                    </div>
+                    <div class="text-center">
+                        <div>대한민국</div>
+                        <div>(-30분)</div>
+                    </div>
+                    <div>
+                        <button class="bg-orange-500 text-white px-4 py-2 rounded mb-1 w-full text-xs">명조비교</button>
+                        <button class="bg-blue-500 text-white px-4 py-2 rounded w-full text-xs">간략보기</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 사주팔자 테이블 -->
+            <table class="saju-table">
+                <thead>
+                    <tr class="pillar-header">
+                        <th id="timeSipsin">겁재</th>
+                        <th>일원</th>
+                        <th id="monthSipsin">편관</th>
+                        <th id="yearSipsin">정인</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td id="timeGanCell" class="gan-fire">
+                            <div class="hanja-xlarge" id="timeGan">丙</div>
+                        </td>
+                        <td id="dayGanCell" class="gan-fire">
+                            <div class="hanja-xlarge" id="dayGan">丁</div>
+                        </td>
+                        <td id="monthGanCell" class="gan-water">
+                            <div class="hanja-xlarge" id="monthGan">癸</div>
+                        </td>
+                        <td id="yearGanCell" class="gan-wood">
+                            <div class="hanja-xlarge" id="yearGan">甲</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td id="timeZhiCell" class="zhi-fire">
+                            <div class="hanja-xlarge" id="timeZhi">午</div>
+                        </td>
+                        <td id="dayZhiCell" class="zhi-fire">
+                            <div class="hanja-xlarge" id="dayZhi">巳</div>
+                        </td>
+                        <td id="monthZhiCell" class="zhi-metal">
+                            <div class="hanja-xlarge" id="monthZhi">酉</div>
+                        </td>
+                        <td id="yearZhiCell" class="zhi-wood">
+                            <div class="hanja-xlarge" id="yearZhi">寅</div>
+                        </td>
+                    </tr>
+                    <tr class="text-sm">
+                        <td id="timeZhiSipsin">비겁</td>
+                        <td id="dayZhiSipsin">겁재</td>
+                        <td id="monthZhiSipsin">편재</td>
+                        <td id="yearZhiSipsin">정인</td>
+                    </tr>
+                    <tr class="text-sm font-bold">
+                        <td>木(2)</td>
+                        <td>火(4)</td>
+                        <td>土(0)</td>
+                        <td>水(1)</td>
+                    </tr>
+                    <tr class="text-xs">
+                        <td id="timeJijang">丙己丁</td>
+                        <td id="dayJijang">戊庚丙</td>
+                        <td id="monthJijang">庚辛</td>
+                        <td id="yearJijang">戊丙甲</td>
+                    </tr>
+                    <tr class="text-xs bg-gray-50">
+                        <td id="timeNapeum">天河水</td>
+                        <td id="dayNapeum">沙中土</td>
+                        <td id="monthNapeum">劍鋒金</td>
+                        <td id="yearNapeum">大溪水</td>
+                    </tr>
+                    <tr class="text-xs">
+                        <td>장성<br>도화</td>
+                        <td>망신</td>
+                        <td>육해<br>장성</td>
+                        <td>겁살</td>
+                    </tr>
+                    <tr class="text-xs">
+                        <td>建祿</td>
+                        <td>-</td>
+                        <td>文昌星<br>學堂貴人</td>
+                        <td>-</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- 천을귀인 -->
+            <div class="bg-gray-100 py-2 text-center text-sm">
+                <span>天乙貴人(亥酉)</span>
+            </div>
+
+            <!-- 광고 2 (중간) -->
+            <div class="ad-container">
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+                     data-ad-slot="0987654321"
+                     data-ad-format="auto"
+                     data-full-width-responsive="true"></ins>
+                <script>
+                     (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+            </div>
+
+            <!-- AI 분석 결과 -->
+            <div id="aiAnalysisSection" class="hidden p-6">
+                <h3 class="text-2xl font-bold mb-4">🤖 AI 사주 분석</h3>
+                
+                <div id="aiLoading" class="flex flex-col items-center justify-center py-10">
+                    <div class="loading-spinner mb-4"></div>
+                    <p class="text-gray-600">AI가 사주를 분석하고 있습니다...</p>
+                </div>
+
+                <div id="aiResult" class="hidden">
+                    <!-- 음양오행 분석 -->
+                    <div class="ai-analysis mb-6">
+                        <h4 class="text-xl font-bold mb-3">📊 음양오행 분석</h4>
+                        <div id="ohangAnalysis"></div>
+                    </div>
+
+                    <!-- 각 글자의 의미 -->
+                    <div class="ai-analysis mb-6">
+                        <h4 class="text-xl font-bold mb-3">📖 각 글자의 의미</h4>
+                        <div id="hanjaMeaning"></div>
+                    </div>
+
+                    <!-- 성격 분석 -->
+                    <div class="ai-analysis mb-6">
+                        <h4 class="text-xl font-bold mb-3">💎 성격 분석</h4>
+                        <div id="personalityAnalysis"></div>
+                    </div>
+
+                    <!-- 대운 분석 -->
+                    <div class="ai-analysis mb-6">
+                        <h4 class="text-xl font-bold mb-3">🔮 현재 대운 분석</h4>
+                        <div id="daeunAnalysis"></div>
+                    </div>
+
+                    <!-- 2026년 운세 -->
+                    <div class="ai-analysis">
+                        <h4 class="text-xl font-bold mb-3">🌟 2026년 운세</h4>
+                        <div id="yearFortune"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 대운 -->
+            <div class="p-2 bg-white border-t-2">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-center">
+                        <tr id="daeunAges" class="text-xs font-bold"></tr>
+                        <tr id="daeunGan"></tr>
+                        <tr id="daeunZhi"></tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 년운 -->
+            <div class="p-2 bg-white border-t">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-center">
+                        <tr id="nyeonunGan"></tr>
+                        <tr id="nyeonunZhi"></tr>
+                        <tr id="nyeonunAges" class="text-xs"></tr>
+                        <tr id="nyeonunYears" class="text-xs"></tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 월운 (역순) -->
+            <div class="p-2 bg-white border-t">
+                <div class="text-center text-xs font-bold mb-2" id="wolunTitle">[ 2026년 (53세) 월 운 ]</div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-center">
+                        <tr id="wolunGan"></tr>
+                        <tr id="wolunZhi"></tr>
+                        <tr id="wolunMonths" class="text-xs"></tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 광고 3 (하단) -->
+            <div class="ad-container">
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+                     data-ad-slot="1122334455"
+                     data-ad-format="auto"
+                     data-full-width-responsive="true"></ins>
+                <script>
+                     (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Bottom Nav -->
+    <div class="fixed bottom-0 left-0 right-0 bg-gray-800 text-white flex justify-around py-3 z-50">
+        <button class="flex flex-col items-center text-xs">
+            <span class="text-xl mb-1">📁</span>저장
+        </button>
+        <button class="flex flex-col items-center text-xs">
+            <span class="text-xl mb-1">🗑️</span>삭제
+        </button>
+        <button class="flex flex-col items-center text-xs">
+            <span class="text-xl mb-1">⬆️⬇️</span>보내기
+        </button>
+        <button class="flex flex-col items-center text-xs">
+            <span class="text-xl mb-1">✏️</span>스타일
+        </button>
+        <button class="flex flex-col items-center text-xs">
+            <span class="text-xl mb-1">💾</span>DB보기
+        </button>
+    </div>
+
+    <script>
+        const jijangganData = {
+            "子": ["癸"], "丑": ["己", "癸", "辛"], "寅": ["戊", "丙", "甲"], "卯": ["乙"],
+            "辰": ["戊", "乙", "癸"], "巳": ["戊", "庚", "丙"], "午": ["丙", "己", "丁"],
+            "未": ["己", "丁", "乙"], "申": ["庚", "戊", "壬"], "酉": ["庚", "辛"],
+            "戌": ["戊", "辛", "丁"], "亥": ["壬", "甲"]
+        };
+
+        const napeumData = {
+            "甲子":"海中金","乙丑":"海中金","丙寅":"爐中火","丁卯":"爐中火","戊辰":"大林木","己巳":"大林木",
+            "庚午":"路旁土","辛未":"路旁土","壬申":"劍鋒金","癸酉":"劍鋒金","甲戌":"山頭火","乙亥":"山頭火",
+            "丙子":"澗下水","丁丑":"澗下水","戊寅":"城頭土","己卯":"城頭土","庚辰":"白鑞金","辛巳":"白鑞金",
+            "壬午":"楊柳木","癸未":"楊柳木","甲申":"泉中水","乙酉":"泉中水","丙戌":"屋上土","丁亥":"屋上土",
+            "戊子":"霹靂火","己丑":"霹靂火","庚寅":"松柏木","辛卯":"松柏木","壬辰":"長流水","癸巳":"長流水",
+            "甲午":"沙中金","乙未":"沙中金","丙申":"山下火","丁酉":"山下火","戊戌":"平地木","己亥":"平地木",
+            "庚子":"壁上土","辛丑":"壁上土","壬寅":"金箔金","癸卯":"金箔金","甲辰":"覆燈火","乙巳":"覆燈火",
+            "丙午":"天河水","丁未":"天河水","戊申":"大驛土","己酉":"大驛土","庚戌":"釵釧金","辛亥":"釵釧金",
+            "壬子":"桑柘木","癸丑":"桑柘木","甲寅":"大溪水","乙卯":"大溪水","丙辰":"沙中土","丁巳":"沙中土",
+            "戊午":"天上火","己未":"天上火","庚申":"石榴木","辛酉":"石榴木","壬戌":"大海水","癸亥":"大海水"
+        };
+
+        const ganList = ["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"];
+        const zhiList = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
+
+        // 오행 분류
+        const ganOhang = {
+            "甲":"木", "乙":"木", "丙":"火", "丁":"火", "戊":"土",
+            "己":"土", "庚":"金", "辛":"金", "壬":"水", "癸":"水"
+        };
+        
+        const zhiOhang = {
+            "子":"水", "丑":"土", "寅":"木", "卯":"木", "辰":"土", "巳":"火",
+            "午":"火", "未":"土", "申":"金", "酉":"金", "戌":"土", "亥":"水"
+        };
+
+        function getOhangClass(char, isGan) {
+            const ohang = isGan ? ganOhang[char] : zhiOhang[char];
+            const prefix = isGan ? 'gan' : 'zhi';
+            return `${prefix}-${ohang === '木' ? 'wood' : ohang === '火' ? 'fire' : ohang === '土' ? 'earth' : ohang === '金' ? 'metal' : 'water'}`;
+        }
+
+        function getGanZhi(startYear, targetYear) {
+            const diff = targetYear - startYear;
+            const ganIdx = diff % 10;
+            const zhiIdx = diff % 12;
+            return {
+                gan: ganList[(ganIdx + 10) % 10],
+                zhi: zhiList[(zhiIdx + 12) % 12]
+            };
+        }
+
+        let currentSaju = null;
+
+        function calculate() {
+            try {
+                const year = parseInt(document.getElementById('year').value);
+                const month = parseInt(document.getElementById('month').value);
+                const day = parseInt(document.getElementById('day').value);
+                const hour = parseInt(document.getElementById('hour').value);
+                const minute = parseInt(document.getElementById('minute').value);
+                const gender = document.getElementById('gender').value;
+
+                const solar = Solar.fromYmdHms(year, month, day, hour, minute, 0);
+                const lunar = solar.getLunar();
+                const bazi = lunar.getEightChar();
+
+                const yearGan = bazi.getYearGan();
+                const yearZhi = bazi.getYearZhi();
+                const monthGan = bazi.getMonthGan();
+                const monthZhi = bazi.getMonthZhi();
+                const dayGan = bazi.getDayGan();
+                const dayZhi = bazi.getDayZhi();
+                const timeGan = bazi.getTimeGan();
+                const timeZhi = bazi.getTimeZhi();
+
+                // 현재 사주 저장
+                currentSaju = { yearGan, yearZhi, monthGan, monthZhi, dayGan, dayZhi, timeGan, timeZhi, year, gender };
+
+                // UI 업데이트
+                document.getElementById('yearGan').textContent = yearGan;
+                document.getElementById('monthGan').textContent = monthGan;
+                document.getElementById('dayGan').textContent = dayGan;
+                document.getElementById('timeGan').textContent = timeGan;
+                document.getElementById('yearZhi').textContent = yearZhi;
+                document.getElementById('monthZhi').textContent = monthZhi;
+                document.getElementById('dayZhi').textContent = dayZhi;
+                document.getElementById('timeZhi').textContent = timeZhi;
+
+                // 오행 색상 적용
+                document.getElementById('yearGanCell').className = getOhangClass(yearGan, true);
+                document.getElementById('monthGanCell').className = getOhangClass(monthGan, true);
+                document.getElementById('dayGanCell').className = getOhangClass(dayGan, true);
+                document.getElementById('timeGanCell').className = getOhangClass(timeGan, true);
+                
+                document.getElementById('yearZhiCell').className = getOhangClass(yearZhi, false);
+                document.getElementById('monthZhiCell').className = getOhangClass(monthZhi, false);
+                document.getElementById('dayZhiCell').className = getOhangClass(dayZhi, false);
+                document.getElementById('timeZhiCell').className = getOhangClass(timeZhi, false);
+
+                // 지장간
+                document.getElementById('yearJijang').textContent = jijangganData[yearZhi].join("");
+                document.getElementById('monthJijang').textContent = jijangganData[monthZhi].join("");
+                document.getElementById('dayJijang').textContent = jijangganData[dayZhi].join("");
+                document.getElementById('timeJijang').textContent = jijangganData[timeZhi].join("");
+
+                // 납음
+                document.getElementById('yearNapeum').textContent = napeumData[yearGan + yearZhi] || "-";
+                document.getElementById('monthNapeum').textContent = napeumData[monthGan + monthZhi] || "-";
+                document.getElementById('dayNapeum').textContent = napeumData[dayGan + dayZhi] || "-";
+                document.getElementById('timeNapeum').textContent = napeumData[timeGan + timeZhi] || "-";
+
+                const currentYear = 2026;
+                const age = currentYear - year + 1;
+                document.getElementById('title').textContent = `SCM(${age}세)`;
+
+                document.getElementById('solarInfo').textContent = 
+                    `${year}년 ${String(month).padStart(2,'0')}월 ${String(day).padStart(2,'0')}일`;
+                document.getElementById('lunarInfo').textContent = 
+                    `${lunar.getYear()}년 ${String(lunar.getMonth()).padStart(2,'0')}월 ${String(lunar.getDay()).padStart(2,'0')}일`;
+                document.getElementById('timeDisplay').textContent = 
+                    `${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}`;
+
+                createDaeun(year, gender, age);
+                createNyeonun(year, age, currentYear);
+                createWolun(currentYear, age);
+
+                document.getElementById('results').classList.remove('hidden');
+                document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+
+            } catch (error) {
+                alert('오류: ' + error.message);
+                console.error(error);
+            }
+        }
+
+        function createDaeun(birthYear, gender, currentAge) {
+            const yearGanIdx = ganList.indexOf(document.getElementById('yearGan').textContent);
+            const isYangGan = yearGanIdx % 2 === 0;
+            const isMale = gender === 'male';
+            const isForward = (isYangGan && isMale) || (!isYangGan && !isMale);
+
+            const monthGan = document.getElementById('monthGan').textContent;
+            const monthZhi = document.getElementById('monthZhi').textContent;
+            const monthGanIdx = ganList.indexOf(monthGan);
+            const monthZhiIdx = zhiList.indexOf(monthZhi);
+
+            let agesHTML = '';
+            let ganHTML = '';
+            let zhiHTML = '';
+
+            for (let i = 0; i < 11; i++) {
+                const age = isForward ? (109 - i * 10) : (9 + i * 10);
+                const daeunNum = Math.floor(i);
+                
+                let ganIdx, zhiIdx;
+                if (isForward) {
+                    ganIdx = (monthGanIdx + 1 + daeunNum) % 10;
+                    zhiIdx = (monthZhiIdx + 1 + daeunNum) % 12;
+                } else {
+                    ganIdx = (monthGanIdx - 1 - daeunNum + 10) % 10;
+                    zhiIdx = (monthZhiIdx - 1 - daeunNum + 12) % 12;
+                }
+
+                const gan = ganList[ganIdx];
+                const zhi = zhiList[zhiIdx];
+                const isCurrent = (currentAge >= age - 9 && currentAge <= age);
+
+                const ganClass = getOhangClass(gan, true);
+                const zhiClass = getOhangClass(zhi, false);
+
+                agesHTML += `<td class="un-cell clickable ${isCurrent ? 'selected-daeun' : ''}" onclick="selectDaeun(${i})" data-daeun="${i}">${age}</td>`;
+                ganHTML += `<td class="un-cell clickable ${ganClass} ${isCurrent ? 'selected-daeun' : ''}" onclick="selectDaeun(${i})" data-daeun="${i}"><div class="hanja-large">${gan}</div></td>`;
+                zhiHTML += `<td class="un-cell clickable ${zhiClass} ${isCurrent ? 'selected-daeun' : ''}" onclick="selectDaeun(${i})" data-daeun="${i}"><div class="hanja-large">${zhi}</div></td>`;
+            }
+
+            document.getElementById('daeunAges').innerHTML = agesHTML;
+            document.getElementById('daeunGan').innerHTML = ganHTML;
+            document.getElementById('daeunZhi').innerHTML = zhiHTML;
+        }
+
+        function createNyeonun(birthYear, currentAge, centerYear) {
+            let ganHTML = '';
+            let zhiHTML = '';
+            let agesHTML = '';
+            let yearsHTML = '';
+
+            for (let i = -6; i <= 6; i++) {
+                const targetYear = centerYear + i;
+                const age = targetYear - birthYear + 1;
+                const gz = getGanZhi(1864, targetYear);
+                const isCurrent = (targetYear === centerYear);
+
+                const ganClass = getOhangClass(gz.gan, true);
+                const zhiClass = getOhangClass(gz.zhi, false);
+
+                ganHTML += `<td class="un-cell clickable ${ganClass} ${isCurrent ? 'selected-nyeonun' : ''}" onclick="selectNyeonun(${i + 6})" data-nyeonun="${i + 6}"><div class="hanja-medium">${gz.gan}</div></td>`;
+                zhiHTML += `<td class="un-cell clickable ${zhiClass} ${isCurrent ? 'selected-nyeonun' : ''}" onclick="selectNyeonun(${i + 6})" data-nyeonun="${i + 6}"><div class="hanja-medium">${gz.zhi}</div></td>`;
+                agesHTML += `<td class="un-cell clickable ${isCurrent ? 'selected-nyeonun' : ''}" onclick="selectNyeonun(${i + 6})" data-nyeonun="${i + 6}">${age}</td>`;
+                yearsHTML += `<td class="un-cell clickable ${isCurrent ? 'selected-nyeonun' : ''}" onclick="selectNyeonun(${i + 6})" data-nyeonun="${i + 6}">${targetYear}</td>`;
+            }
+
+            document.getElementById('nyeonunGan').innerHTML = ganHTML;
+            document.getElementById('nyeonunZhi').innerHTML = zhiHTML;
+            document.getElementById('nyeonunAges').innerHTML = agesHTML;
+            document.getElementById('nyeonunYears').innerHTML = yearsHTML;
+        }
+
+        function createWolun(targetYear, age) {
+            let ganHTML = '';
+            let zhiHTML = '';
+            let monthsHTML = '';
+
+            // 12월부터 1월까지 역순
+            for (let month = 12; month >= 1; month--) {
+                const solar = Solar.fromYmdHms(targetYear, month, 15, 12, 0, 0);
+                const bazi = solar.getLunar().getEightChar();
+                const monthGan = bazi.getMonthGan();
+                const monthZhi = bazi.getMonthZhi();
+                const isCurrent = (month === 12);
+
+                const ganClass = getOhangClass(monthGan, true);
+                const zhiClass = getOhangClass(monthZhi, false);
+
+                ganHTML += `<td class="un-cell clickable ${ganClass} ${isCurrent ? 'selected-wolun' : ''}" onclick="selectWolun(${12 - month})" data-wolun="${12 - month}"><div class="hanja-small">${monthGan}</div></td>`;
+                zhiHTML += `<td class="un-cell clickable ${zhiClass} ${isCurrent ? 'selected-wolun' : ''}" onclick="selectWolun(${12 - month})" data-wolun="${12 - month}"><div class="hanja-small">${monthZhi}</div></td>`;
+                monthsHTML += `<td class="un-cell clickable ${isCurrent ? 'selected-wolun' : ''}" onclick="selectWolun(${12 - month})" data-wolun="${12 - month}">${month}</td>`;
+            }
+
+            document.getElementById('wolunGan').innerHTML = ganHTML;
+            document.getElementById('wolunZhi').innerHTML = zhiHTML;
+            document.getElementById('wolunMonths').innerHTML = monthsHTML;
+            document.getElementById('wolunTitle').textContent = `[ ${targetYear}년 (${age}세) 월 운 ]`;
+        }
+
+        function selectDaeun(index) {
+            document.querySelectorAll('[data-daeun]').forEach(el => el.classList.remove('selected-daeun'));
+            document.querySelectorAll(`[data-daeun="${index}"]`).forEach(el => el.classList.add('selected-daeun'));
+        }
+
+        function selectNyeonun(index) {
+            document.querySelectorAll('[data-nyeonun]').forEach(el => el.classList.remove('selected-nyeonun'));
+            document.querySelectorAll(`[data-nyeonun="${index}"]`).forEach(el => el.classList.add('selected-nyeonun'));
+        }
+
+        function selectWolun(index) {
+            document.querySelectorAll('[data-wolun]').forEach(el => el.classList.remove('selected-wolun'));
+            document.querySelectorAll(`[data-wolun="${index}"]`).forEach(el => el.classList.add('selected-wolun'));
+        }
+
+        async function analyzeWithAI() {
+            if (!currentSaju) {
+                alert('먼저 명조보기를 클릭해주세요!');
+                return;
+            }
+
+            document.getElementById('aiAnalysisSection').classList.remove('hidden');
+            document.getElementById('aiLoading').classList.remove('hidden');
+            document.getElementById('aiResult').classList.add('hidden');
+            document.getElementById('aiAnalysisSection').scrollIntoView({ behavior: 'smooth' });
+
+            // 시뮬레이션: 3초 후 AI 결과 표시
+            setTimeout(() => {
+                showAIAnalysis();
+                document.getElementById('aiLoading').classList.add('hidden');
+                document.getElementById('aiResult').classList.remove('hidden');
+            }, 3000);
+        }
+
+        function showAIAnalysis() {
+            const { yearGan, yearZhi, monthGan, monthZhi, dayGan, dayZhi, timeGan, timeZhi } = currentSaju;
+
+            // 음양오행 분석
+            const ohangCount = { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 };
+            [yearGan, monthGan, dayGan, timeGan].forEach(g => ohangCount[ganOhang[g]]++);
+            [yearZhi, monthZhi, dayZhi, timeZhi].forEach(z => ohangCount[zhiOhang[z]]++);
+
+            document.getElementById('ohangAnalysis').innerHTML = `
+                <div class="grid grid-cols-5 gap-3 mb-4">
+                    <div class="gan-wood p-3 rounded text-center"><strong>木</strong><br>${ohangCount.木}개</div>
+                    <div class="gan-fire p-3 rounded text-center"><strong>火</strong><br>${ohangCount.火}개</div>
+                    <div class="gan-earth p-3 rounded text-center"><strong>土</strong><br>${ohangCount.土}개</div>
+                    <div class="gan-metal p-3 rounded text-center"><strong>金</strong><br>${ohangCount.金}개</div>
+                    <div class="gan-water p-3 rounded text-center"><strong>水</strong><br>${ohangCount.水}개</div>
+                </div>
+                <p class="text-gray-700 leading-relaxed">
+                    화(火) 기운이 강하고, 토(土)가 없어 조화가 필요합니다. 
+                    목(木)과 수(水)가 적절히 있어 균형을 이루려 하나, 토(土) 보충이 필요합니다.
+                </p>
+            `;
+
+            // 각 글자의 의미
+            document.getElementById('hanjaMeaning').innerHTML = `
+                <div class="space-y-3">
+                    <div><strong class="text-lg">${dayGan} (일간 - 나 자신):</strong> 촛불의 불꽃, 섬세하고 예리한 지혜</div>
+                    <div><strong class="text-lg">${dayZhi} (일지):</strong> 뱀, 지혜롭고 신중함</div>
+                    <div><strong class="text-lg">${monthGan} (월간):</strong> 빗물, 부드럽고 유연한 지혜</div>
+                    <div><strong class="text-lg">${yearGan} (년간):</strong> 큰 나무, 성장과 발전</div>
+                </div>
+            `;
+
+            // 성격 분석
+            document.getElementById('personalityAnalysis').innerHTML = `
+                <p class="text-gray-700 leading-relaxed mb-3">
+                    <strong>정사일주(${dayGan}${dayZhi})</strong>는 촛불이 뱀을 만난 형상으로, 
+                    지혜롭고 영리한 성품을 가지고 있습니다.
+                </p>
+                <p class="text-gray-700 leading-relaxed mb-3">
+                    총명하고 예리한 판단력이 있으며, 예술적 감각이 뛰어납니다. 
+                    내면의 열정이 강하지만 겉으로는 차분하게 표현하는 능력이 있습니다.
+                </p>
+                <p class="text-gray-700 leading-relaxed">
+                    완벽주의 성향이 있어 깊은 사고를 하며, 사람의 마음을 이해하는 능력이 탁월합니다.
+                </p>
+            `;
+
+            // 대운 분석
+            document.getElementById('daeunAnalysis').innerHTML = `
+                <p class="text-gray-700 leading-relaxed mb-3">
+                    현재 <strong class="text-orange-600">戊寅 대운</strong>을 지나고 있습니다. 
+                    무토(戊土)는 산의 흙으로 안정과 기반을 상징합니다.
+                </p>
+                <p class="text-gray-700 leading-relaxed">
+                    이 시기는 기반을 다지고 경력을 쌓는 중요한 시기입니다. 
+                    인목(寅木)이 함께 있어 성장과 확장의 기회도 있습니다.
+                </p>
+            `;
+
+            // 2026년 운세
+            document.getElementById('yearFortune').innerHTML = `
+                <p class="text-gray-700 leading-relaxed mb-3">
+                    <strong class="text-blue-600">2026년 丙午년</strong>은 화(火) 기운이 매우 강한 해입니다.
+                </p>
+                <div class="space-y-2">
+                    <div><strong>💰 재물운:</strong> 화 기운이 강해 활동적인 한 해. 적극적인 투자와 사업 확장 고려</div>
+                    <div><strong>💼 사업운:</strong> 리더십을 발휘할 기회. 새로운 프로젝트 시작 길함</div>
+                    <div><strong>💕 애정운:</strong> 열정적인 만남 가능. 기존 관계는 더욱 돈독해짐</div>
+                    <div><strong>🏥 건강운:</strong> 화 기운 과다로 심장, 혈압 주의. 충분한 휴식 필요</div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
